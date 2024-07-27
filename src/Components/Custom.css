@@ -17,7 +17,7 @@ main{
 }
 
 .kzui-disabled{
-    background-color: cornflowerblue;
+    background-color:#dddddd;
     cursor: not-allowed;
 }
 
@@ -71,12 +71,18 @@ button:hover{
     color: blue;
 }
 input{
-    border: none;
    
+   
+    font-size: larger;
+    height: 2rem;
+    width: 4rem;
+    max-width: fit-content;
+    box-sizing: content-box;
+    transition: width 0.2s;
+    border: none;
     outline: none;
+    background-color: transparent;
     
-    font-weight: 600;
-    background-color: aquamarine;
 }
 
 .kzui-optionContainer{

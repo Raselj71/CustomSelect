@@ -1,12 +1,15 @@
 import React, { useState } from "react";
 import CustomSelect from "./Components/CustomSelect";
 
+
+//Option data
 const options = [
   { value: "chocolate", label: "Chocolate" },
   { value: "strawberry", label: "Strawberry" },
   { value: "vanilla", label: "Vanilla" },
 ];
 
+//group option Data
 const groupedOptions = [
   {
     label: "Fruits",
@@ -24,17 +27,19 @@ const groupedOptions = [
   },
 ];
 
+
 const App = () => {
-  const [selectedValue, setSelectedValue] = useState(
-   []
-  );
-
+  //For initial selected value
+  const [selectedValue, setSelectedValue] = useState([]);
  
-
-  const handleChange = (selectedOption:any) => {
+  //for onchage for selected element
+  const handleChange = (selectedOption: any) => {
     setSelectedValue(selectedOption);
   };
 
+  console.log(selectedValue);
+
+  //custom select componet
   return (
     <div>
       <h1>Custom Select Component</h1>

@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
-
+import React, { useState } from "react";
 import { IoMdArrowDropdown } from "react-icons/io";
 import "./Custom.css";
 
+
+//props and props data type
 interface Option {
   value: string;
   label: string;
@@ -12,15 +13,19 @@ interface GroupedOptions {
   label: string;
   options: Option[];
 }
+
 interface propstype {
   isClearable: boolean;
   isSearchable: boolean;
   isDisabled: boolean;
   Options: GroupedOptions[];
   value: Option | Option[] | null;
-  placeholder: String;
+  placeholder: string;
   isMulti: boolean;
   isGrouped: boolean;
+  onChangeHandler: (value: Option | Option[] | null) => void;
+  onMenuOpen: () => void;
+  onSearchHandler: (inputValue: string) => void;
 }
 
 function CustomSelect({
@@ -32,53 +37,107 @@ function CustomSelect({
   placeholder,
   isMulti,
   isGrouped,
+  onChangeHandler,
+  onMenuOpen,
+  onSearchHandler,
 }: propstype) {
+
+
   const [selectedValue, setSelectedValue] = useState<Option | Option[] | null>(
-    null
+    value
   );
   const [searchValue, setSearchValue] = useState("");
   const [isOpen, setIsOpen] = useState(false);
-  useEffect(() => {
-    setSelectedValue(value);
-  }, [value]);
+  const [filteredOptions, setFilteredOptions] = useState(Options);
+  {
+    // console.log(selectedValue);
+  }
 
-  const handleClear = (e) => {
+  //fuction for delete selected item
+  const handleClear = (e: any) => {
     e.stopPropagation();
     if (isMulti) {
       if (Array.isArray(selectedValue) && selectedValue.length > 0) {
         const newValue = selectedValue.slice(0, -1);
-        setSelectedValue(newValue);
+        handleSelect(newValue);
       } else {
-        setSelectedValue([]);
+        handleSelect([]);
       }
     } else {
-      setSelectedValue([]);
+      handleSelect([]);
     }
   };
 
-  const onChangeHandler = () => {};
+  //function for select item
+  const handleSelect = (newValue: any) => {
+    setSelectedValue(newValue);
 
-  const handleOptionClick = (option) => {
+    onChangeHandler(newValue);
+  };
+
+  //fuction for opening Option
+  const toggleMenu = () => {
+     if(!isDisabled){
+      if (!isOpen) {
+        onMenuOpen();
+      }
+      setIsOpen(!isOpen);
+     }
+  };
+  // console.log(selectedValue);
+
+
+  //for searching and show filter data
+  const onChangeHandleValue = (e: any) => {
+    setIsOpen(true);
+    const data = e.target.value;
+    onSearchHandler(data);
+    setSearchValue(data);
+
+    if (data) {
+      const filterOption = Options.map((option) =>
+        isGrouped
+          ? {
+              ...option,
+              options: option.options.filter((opt) =>
+                opt.label.toLowerCase().includes(data.toLowerCase())
+              ),
+            }
+          : option
+      ).filter((option) =>
+        isGrouped
+          ? option.options.length > 0
+          : option.label.toLowerCase().includes(data.toLowerCase())
+      );
+
+      setFilteredOptions(filterOption);
+    } else {
+      setFilteredOptions(Options);
+    }
+  };
+
+   //for handling click event in option item
+  const handleOptionClick = (option: Option) => {
+    let newValue: Option | Option[] | null;
     if (isMulti) {
       if (Array.isArray(selectedValue)) {
-        const newValeu = [...selectedValue, option];
-        setSelectedValue(newValeu);
+        newValue = [...selectedValue, option];
       } else {
-        const data = new Array(selectedValue);
-        setSelectedValue([...data, option]);
+        newValue = selectedValue ? [selectedValue, option] : [option];
       }
     } else {
-      setSelectedValue(option);
-
+      newValue = option;
       setIsOpen(false);
     }
+
+    handleSelect(newValue);
   };
 
   return (
     <main>
       <div
         onClick={() => {
-          setIsOpen(!isOpen);
+          toggleMenu();
         }}
         className={`kzui-container ${isDisabled ? "kzui-disabled" : ""}`}
       >
@@ -105,10 +164,25 @@ function CustomSelect({
                 )}
               </div>
             )}
+
+            {isSearchable && (
+              <div>
+                <input
+                  disabled={isDisabled}
+                  type="text"
+                  value={searchValue}
+                  placeholder="search"
+
+                  onChange={onChangeHandleValue}
+                />
+              </div>
+            )}
           </div>
 
           <div className="kzui-subcontainer__right">
-            {isClearable && <button onClick={handleClear}>X</button>}
+            {isClearable && selectedValue && (
+              <button onClick={handleClear}>X</button>
+            )}
             <div className="kzui-rule"></div>
             <IoMdArrowDropdown className="kzui-dropdown" />
           </div>
@@ -118,7 +192,7 @@ function CustomSelect({
       {isOpen && (
         <div className="kzui-optionContainer">
           {isGrouped
-            ? Options.map((group, index) => (
+            ? filteredOptions.map((group, index) => (
                 <div key={index} className="kzui-option-group">
                   <div className="kzui-group-label">{group.label}</div>
                   {group.options.map((option, i) => (
@@ -132,7 +206,7 @@ function CustomSelect({
                   ))}
                 </div>
               ))
-            : Options.map((option, index) => (
+            : filteredOptions.map((option, index) => (
                 <div
                   key={index}
                   className="kzui-option"
